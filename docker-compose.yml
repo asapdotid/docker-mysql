@@ -1,0 +1,34 @@
+version: '2'
+
+networks:
+
+  app-tier:
+    driver: bridge
+
+services:
+
+  mysql:
+    container_name: mysql
+    hostname: mysql
+    build: 
+      context: ./docker/mysql/${PHP_VERSION}/${OS_VERSION}
+      dockerfile: Dockerfile
+    labels:
+      kompose.service.type: nodeport
+    restart: always
+    networks: 
+      - app-tier
+    ports:
+      - "${ENV_MYSQL_PORT}:3306"
+    volumes:
+      - ./data/mysql/${PHP_VERSION}:/bitnami/mysql/data:rw,cached
+      - ./logs/mysql/${PHP_VERSION}:/opt/bitnami/mysql/logs:rw,cached
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=${ENV_ALLOW_EMPTY_PASSWORD}
+      # MYSQL_ROOT_PASSWORD is recommended only for production.
+      - MYSQL_ROOT_PASSWORD=${ENV_MYSQL_ROOT_PASSWORD}
+      # CREATE USER & DATABASE
+      - MYSQL_USER=${ENV_MYSQL_USER}
+      - MYSQL_PASSWORD=${ENV_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${ENV_MYSQL_DATABASE}
